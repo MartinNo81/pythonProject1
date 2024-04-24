@@ -77,5 +77,4 @@
 #    vystup1=(-b+d**1/2)/2*a
 #    vystup2=(-b-d**1/2)/2*a
 #   print("rovnice na 2 reseni!\nkoreny rovnice:{0},{1}".format(vystup1,vystup2))
-#:
 #   print("rovnice nema reseni!")
