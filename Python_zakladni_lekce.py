@@ -65,9 +65,21 @@
 #else:
 #    print("v pohode jmeno!")
 
+#print("ryby")
+#pocet = int(input("kolik ryb chces k veceri?\n"))
+#for i in range(pocet):
+#    print("<° )))-<")
 
+#print("lahve na stole:")
+#for i in range(10,0,-1):
+#    if i >4:
+#        lahve = "zelenych lahvi"
+#    else:
+#        lahve = "zelena lahev"
+#    print(" {0} {1} stojí na stole a jedna spadne".format(i,lahve))
 
-
-
-
+#print("kombinator")
+#for i in range(1,7,1):
+#    for j in range (1,7,1):
+#        print(f"({i},{j}),",end = ' ')
 
