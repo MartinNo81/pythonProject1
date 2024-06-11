@@ -1,6 +1,13 @@
 #print("papousek")
 #vstup = input("Napis neco:")
 #print("jsem papousek a opakuji:" + vstup + vstup + "!")
+import calendar
+import datetime
+
+import matplotlib
+import numpy
+import pandas
+import pip
 
 #print("zdvojnásobovač")
 #vstup = int(input("zadej cislo:"))
@@ -82,4 +89,26 @@
 #for i in range(1,7,1):
 #    for j in range (1,7,1):
 #        print(f"({i},{j}),",end = ' ')
+
+# LIST APPEND
+#seznam = [3,5,2]
+#seznam.append((99))
+#print(seznam)
+
+#LIST INSERT
+#seznam = [3,5,2]
+#seznam.insert(1,99)
+#print(seznam)
+
+#LIST EXTEND
+#seznam=[1,2,3]
+#seznam2=[4,5,6]
+#seznam.extend(seznam2)
+#print(seznam)
+
+#LIST CLEAR, REMOVE, REVERSE, COUNT, SORT
+
+
+
+
 
