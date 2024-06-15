@@ -68,7 +68,7 @@ vyska = pd.Series(np.random.randint(120,231, size = 20))
 kategorie = ("trpasličí","malý","průměrný","vysoký","obří")
 biny = (0, 130, 160, 180, 200,231)
 skupiny = pd.cut(vyska, bins=biny, labels=kategorie)
-#print(skupiny)
+print(skupiny)
 
 #Kolikrát jste vybrané osobě půjčili částku v rozmezí 0 až 2500, 2500 až 5000, 5000 až 7500 a 7500 až 10000.
 #Kolik jste půjčili v jednotlivých dnech pomocí liniového grafu.
@@ -85,6 +85,7 @@ plt.grid(True)
 
 plt.figure(figsize=(10, 5))
 plt.plot(data["den"], data["dluh"], marker='o')
+plt.xticks(rotation=45)
 plt.grid(True)
 plt.show()
 
