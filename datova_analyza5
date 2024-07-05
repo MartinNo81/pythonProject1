@@ -1,0 +1,285 @@
+import numpy as np
+import cv2
+
+#Načtěte obrázek a najděte si v něm souřadnice, kde se zhruba nachází něco,
+#co vás zajímá (například obličej). Napište kód, kterým tento region zvýrazníte tak,
+#že okraje tohoto ROI budou sytě zeleně obarveny. K vykresleni si
+#muzete pomoct metodou cv2.rectangle.
+
+image = cv2.imread("Mona_Lisa,_by_Leonardo_da_Vinci,_from_C2RMF_retouched.jpg",-1)
+print(image.shape)
+# Definování souřadnic levého horního a pravého dolního rohu obdélníku
+pt1 = (380, 335)
+pt2 = (440, 370)
+# Definování barvy obdélníku (červená v BGR formátu)
+color = (0, 255, 0)
+# Definování tloušťky čar obdélníku
+thickness = 3
+# Vykreslení obdélníku na obrázek
+rectangle_image = cv2.rectangle(image, pt1, pt2, color, thickness)
+# Zobrazení obrázku s vykresleným obdélníkem
+cv2.imshow('Image with Rectangle', rectangle_image)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+-------------------------------------------------------------------------------------
+
+#Cvičení 2 - Datová augmentace
+#Všechny následující úkony proveďte jedním programem v pythonu.
+
+#Vytvořte adresář rotace pokud neexistuje
+#Načtěte obrázek do pythonu
+#Napište cyklus, kterým zrotujte obrázek vždy o 10 stupňů a takto upravený obrázek uložte do složky rotace
+#Program skončí, jakmile byl obrázek zrotován o celých 360 stupňů
+
+import numpy as np
+import cv2
+import os
+
+#vytvoreni slozky, nacteni obrazku
+image_name = "Mona_Lisa,_by_Leonardo_da_Vinci,_from_C2RMF_retouched.jpg"
+image_folder = "rotate_images"
+if not os.path.exists(image_folder):
+    os.makedirs(image_folder, exist_ok=True)
+
+image = cv2.imread(image_name)
+
+# priprava rotacni matice
+(length,width,layer) = image.shape
+center = [(width-1)/2,(length-1)/2]
+angle = 0
+scale = 1
+rot_matrix = cv2.getRotationMatrix2D(center,angle,scale)
+
+#rotace obrazku a jeho zuloyeni do slozky
+while angle>(-360):
+    rot_matrix = cv2.getRotationMatrix2D(center, angle, scale)
+    rotate_image = cv2.warpAffine(image, rot_matrix, (width, length))
+    save_name = f'rotated_image_{angle}_degrees.jpg'
+    file_path = os.path.join(image_folder, save_name)
+    cv2.imwrite(file_path,rotate_image)
+    angle=angle-10
+
+-------------------------------------------------------------------------------------
+
+#Cvičení 3 - Binarizace Tetris kostiček
+#Spusťte skript v první buňce, který stáhne obrázek Tetris kostiček. Napište program,
+#který binarizuje obrázek tetris kostiček. Doporučuji si obrázek převést do odstínů šedi,
+#vykreslit histogram a podle něj se rozhodnout o vhodné práhové hodnotě a to takové,
+#aby kostičky byly bílé a pozadí černé.
+
+import numpy as np
+import cv2
+import os
+import matplotlib.pyplot as plt
+import skimage.color
+
+image_name = "output tetris.jpg"
+image = cv2.imread(image_name,1)
+grayscale_image = skimage.color.rgb2gray(image)
+save_folder = "tetris"
+
+# Získání rozměrů obrazovky
+screen_res = 1280, 720
+scale_width = screen_res[0] / image.shape[1]
+scale_height = screen_res[1] / image.shape[0]
+scale = min(scale_width, scale_height)
+
+# Výpočet nových rozměrů obrázku
+window_width = int(image.shape[1] * scale)
+window_height = int(image.shape[0] * scale)
+
+# Změna velikosti obrázku
+grayscale_image = cv2.resize(grayscale_image, (window_width, window_height))
+
+#nastav prah intenzity pixelu, od ktereho odstran pixely (relativně od 0=min do 1=max)
+threshold = 0.095
+#pocet binu na histogramu, urcuje hustotu deleni
+nbins = 256
+
+#vytvor histogram intenzity poctu pixelu (y) o dane intenzite pixelu (x0 z rozmazaneho obrazu
+histogram, bin_edges = np.histogram(grayscale_image, bins=nbins, range=(0.0, 1.0))
+
+#vytvor histogram, na ose x jsou biny, na ose y jsou data histogramu
+plt.plot(bin_edges[0:-1], histogram)
+
+#vykresli vertikalni cervenou caru na bod na ose x, kde byl zvolen prah
+plt.axvline(x=threshold, color='r')
+
+#nazev grafu
+plt.title('Histogram intenzity')
+
+#popisek osy x
+plt.xlabel("Intenzita")
+
+#popisek osy y
+plt.ylabel("Počet pixelů")
+
+#rozsah na ose x (hodnoty od 0 do 1)
+plt.xlim(0, 1.0)
+
+#zobraz histogram na obrazovku
+plt.show()
+
+# Definování prahové hodnoty a maximální hodnoty
+threshold_value = 0.095
+max_value = 1
+
+# Aplikace prahování
+_, thresholded_image = cv2.threshold(grayscale_image, threshold_value, max_value, cv2.THRESH_BINARY)
+
+
+cv2.imshow('Grayscale Image', grayscale_image)
+cv2.imshow('Thresholded Image', thresholded_image)
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+-----------------------------------------------------------------------------------------
+
+#Cvičení 4 - Nalezení hran Tetris kostiček
+#Spusťte skript v první buňce, který stáhne obrázek Tetris kostiček.
+#Napište program, který najde hrany těchto kostiček a zobrazí obrázek s vyznačenými hranami.
+#Doporučuji si napřed převést obrázek do černobílého.
+
+import cv2
+import skimage.color
+
+image_name = "output tetris.jpg"
+image = cv2.imread(image_name,1)
+grayscale_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+# Získání rozměrů obrazovky
+screen_res = 1280, 720
+scale_width = screen_res[0] / image.shape[1]
+scale_height = screen_res[1] / image.shape[0]
+scale = min(scale_width, scale_height)
+
+# Výpočet nových rozměrů obrázku
+window_width = int(image.shape[1] * scale)
+window_height = int(image.shape[0] * scale)
+
+# Změna velikosti obrázku
+grayscale_image = cv2.resize(grayscale_image, (window_width, window_height))
+
+edges = cv2.Canny(grayscale_image,70, 130)
+cv2.imshow('Edges Image',edges)
+cv2.imshow('Grayscale Image',grayscale_image)
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+--------------------------------------------------------------------------------------------
+
+#Cvičení 4 - Morfologické operace
+#Proveďte v openCV následující morfologické operace nad binarizovaným obrázkem a
+#zobrazte si výsledky. Morfologické operace:
+
+#Eroze - zvolte počet iterací 5
+#Dilatace - zvolte počet iterací 5
+#Otevření (eroze pak dilatace) - zvolte počet iterací 1
+#Uzavření (dilatace pak eroze) - zvolte počet iterací 2
+#Erozi a dilataci proveďte na obrázku tetris2.png.
+
+#Otevření a uzavření proveďte na obrázku otiskprstu.png.
+import numpy as np
+import cv2
+import skimage.color
+
+image_name1 = "tetris_blocks.png"
+image_name2 =  "0_UuVpL5-ama-Ne9AO.png"
+image1 = cv2.imread(image_name1, cv2.IMREAD_GRAYSCALE)
+image2 = cv2.imread(image_name2)
+
+# Eroze Definování strukturačního prvku
+kernel = np.ones((3, 3), np.uint8)
+
+# Aplikace erozi
+eroded_image = cv2.erode(image1, kernel, iterations=5)
+
+# Zobrazení původního a erodovaného obrázku
+cv2.imshow('Original Image', image1)
+cv2.imshow('Eroded Image', eroded_image)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+# Aplikace dilate
+dilated_image = cv2.dilate(image1, kernel, iterations=5)
+
+# Zobrazení původního a dilatovaneho obrázku
+cv2.imshow('Original Image', image1)
+cv2.imshow('Dilated Image', dilated_image)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+# Aplikace otevření
+opened_image = cv2.morphologyEx(image2, cv2.MORPH_OPEN, kernel,iterations=1)
+
+# Zobrazení původního a otevreneho obrázku
+cv2.imshow('Original Image', image2)
+cv2.imshow('Opened Image', opened_image)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+# Aplikace zavreni
+closed_image = cv2.morphologyEx(image2, cv2.MORPH_CLOSE, kernel,iterations=2)
+
+
+# Zobrazení původního a zavreneho obrázku
+cv2.imshow('Original Image', image2)
+cv2.imshow('Closed Image', closed_image)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+-----------------------------------------------------------------------------------------------------
+
+#Cvičení 5 - Spočítejte počet mincí, které se nacházejí v následujícím obrázku
+
+#Binarizujte obrázek a ponechte mince bílé
+#Odstraňte šum (například operací uzavření)
+#Odtrhněte mince od sebe (operace eroze)
+#Spočítejte počet kontur funkcí cv2.findCountours
+#Spočítejte velikost seznamu nalezených kontur
+
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+import skimage.color
+
+image = cv2.imread("water_coins.jpg")
+if image.dtype == np.float64:
+    image = cv2.convertScaleAbs(image)
+grayscale_image = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+
+print(grayscale_image.dtype)
+nbins = 256
+
+#vytvor histogram intenzity poctu pixelu (y) o dane intenzite pixelu (x0 z rozmazaneho obrazu
+histogram, bin_edges = np.histogram(grayscale_image, bins=nbins, range=(0, 255))
+
+#vytvor histogram, na ose x jsou biny, na ose y jsou data histogramu
+plt.plot(bin_edges[0:-1], histogram)
+plt.show()
+
+
+# Definování prahové hodnoty a maximální hodnoty
+threshold_value = 150
+max_value = 255
+
+# Aplikace prahování
+_, thresholded_image = cv2.threshold(grayscale_image, threshold_value, max_value, cv2.THRESH_BINARY_INV)
+
+#Aplikace uyavreni
+kernel = np.ones((3, 3), np.uint8)
+closed_image = cv2.morphologyEx(thresholded_image, cv2.MORPH_CLOSE, kernel,iterations=1)
+erode_image = cv2.erode(closed_image, kernel,iterations=12)
+
+contours, hierarchy = cv2.findContours(erode_image, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+
+number_of_contours = len(contours)
+print(number_of_contours)
+
+cv2.drawContours(image, contours, -1, (0, 0, 255), 2)
+cv2.imshow('Contours', image)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
