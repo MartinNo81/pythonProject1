@@ -165,7 +165,6 @@ grayscale_image = cv2.resize(grayscale_image, (window_width, window_height))
 edges = cv2.Canny(grayscale_image,70, 130)
 cv2.imshow('Edges Image',edges)
 cv2.imshow('Grayscale Image',grayscale_image)
-
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
@@ -179,9 +178,10 @@ cv2.destroyAllWindows()
 #Dilatace - zvolte počet iterací 5
 #Otevření (eroze pak dilatace) - zvolte počet iterací 1
 #Uzavření (dilatace pak eroze) - zvolte počet iterací 2
-#Erozi a dilataci proveďte na obrázku tetris2.png.
 
+#Erozi a dilataci proveďte na obrázku tetris2.png.
 #Otevření a uzavření proveďte na obrázku otiskprstu.png.
+
 import numpy as np
 import cv2
 import skimage.color
@@ -250,17 +250,13 @@ image = cv2.imread("water_coins.jpg")
 if image.dtype == np.float64:
     image = cv2.convertScaleAbs(image)
 grayscale_image = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
-
 print(grayscale_image.dtype)
-nbins = 256
 
 #vytvor histogram intenzity poctu pixelu (y) o dane intenzite pixelu (x0 z rozmazaneho obrazu
+nbins = 256
 histogram, bin_edges = np.histogram(grayscale_image, bins=nbins, range=(0, 255))
-
-#vytvor histogram, na ose x jsou biny, na ose y jsou data histogramu
 plt.plot(bin_edges[0:-1], histogram)
 plt.show()
-
 
 # Definování prahové hodnoty a maximální hodnoty
 threshold_value = 150
@@ -269,13 +265,14 @@ max_value = 255
 # Aplikace prahování
 _, thresholded_image = cv2.threshold(grayscale_image, threshold_value, max_value, cv2.THRESH_BINARY_INV)
 
-#Aplikace uyavreni
+#Aplikace uzavreni
 kernel = np.ones((3, 3), np.uint8)
 closed_image = cv2.morphologyEx(thresholded_image, cv2.MORPH_CLOSE, kernel,iterations=1)
+#Aplikace eroze
 erode_image = cv2.erode(closed_image, kernel,iterations=12)
 
+#Výpočet kontur a jejich počtu
 contours, hierarchy = cv2.findContours(erode_image, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-
 number_of_contours = len(contours)
 print(number_of_contours)
 
